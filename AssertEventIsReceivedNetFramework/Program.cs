@@ -42,7 +42,7 @@ namespace AssertEventIsReceived
         /// </summary>
         static void TestUsingReflection()
         {
-            AssertEventIsReceived<Thing, Thing.SomethingHappenedEventHandler>("SomethingHappened", "TriggerEvent");
+            AssertEventIsReceived<Thing, Thing.SomethingHappenedEventHandler>(nameof(Thing.SomethingHappened), nameof(Thing.TriggerEvent));
         }
 
         class Thing
@@ -70,7 +70,7 @@ namespace AssertEventIsReceived
             var triggerMethod = typeof(TEventSender).GetMethod(triggerMethodName);
             
             // Here's the magic.
-            var markEventAsRaisedWrapper = Delegate.CreateDelegate(typeof(TEventHandler), markEventAsRaised, "Invoke");
+            var markEventAsRaisedWrapper = Delegate.CreateDelegate(typeof(TEventHandler), markEventAsRaised, nameof(markEventAsRaised.Invoke));
 
             try
             {
