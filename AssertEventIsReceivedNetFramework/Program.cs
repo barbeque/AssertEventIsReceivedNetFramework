@@ -1,14 +1,19 @@
 ﻿using System;
-using System.Reflection;
 
 namespace AssertEventIsReceived
 {
     class Program
     {
+        static void Main(string[] args)
+        {
+            TestTheExplicitWay();
+            TestUsingReflection();
+        }
+
         /// <summary>
         /// The explicit, copy and paste way of figuring out if a certain action raises a certain event.
         /// </summary>
-        static void ExplicitWay()
+        static void TestTheExplicitWay()
         {
             var didEventRaise = false;
             Action<object, EventArgs> markEventAsRaised =
@@ -35,12 +40,10 @@ namespace AssertEventIsReceived
         /// <summary>
         /// With a little bit of reflection magic we can cut down on copy-and-paste code, and therefore defects
         /// </summary>
-        static void Main(string[] args)
+        static void TestUsingReflection()
         {
             AssertEventIsReceived<Thing, Thing.SomethingHappenedEventHandler>("SomethingHappened", "TriggerEvent");
         }
-
-        
 
         class Thing
         {
