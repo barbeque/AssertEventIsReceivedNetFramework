@@ -5,7 +5,9 @@ namespace AssertEventIsReceived
 {
     class Program
     {
-
+        /// <summary>
+        /// The explicit, copy and paste way of figuring out if a certain action raises a certain event.
+        /// </summary>
         static void ExplicitWay()
         {
             var didEventRaise = false;
@@ -30,18 +32,15 @@ namespace AssertEventIsReceived
             AssertIsTrue(didEventRaise);
         }
 
-        private static void AssertIsTrue(bool v)
-        {
-            if (!v)
-            {
-                throw new Exception("Assertion failed");
-            }
-        }
-
+        /// <summary>
+        /// With a little bit of reflection magic we can cut down on copy-and-paste code, and therefore defects
+        /// </summary>
         static void Main(string[] args)
         {
             AssertEventIsReceived<Thing, Thing.SomethingHappenedEventHandler>("SomethingHappened", "TriggerEvent");
         }
+
+        
 
         class Thing
         {
@@ -67,7 +66,7 @@ namespace AssertEventIsReceived
             var toBind = typeof(TEventSender).GetEvent(eventName);
             var triggerMethod = typeof(TEventSender).GetMethod(triggerMethodName);
             
-
+            // Here's the magic.
             var markEventAsRaisedWrapper = Delegate.CreateDelegate(typeof(TEventHandler), markEventAsRaised, "Invoke");
 
             try
@@ -82,43 +81,17 @@ namespace AssertEventIsReceived
 
             AssertIsTrue(wasEventEverRaised);
         }
+
+        #region Test boilerplate
+
+        private static void AssertIsTrue(bool v)
+        {
+            if (!v)
+            {
+                throw new Exception("Assertion failed");
+            }
+        }
+
+        #endregion
     }
-
-    /*
-     *
-    Private Sub AssertEventIsReceived(Of TEventWrapper, TEventHandler)(eventName As String, triggerMethod As String)
-
-        Dim wrapper = Activator.CreateInstance(Of TEventWrapper)()
-        Dim gotEvent = False
-
-        Dim handler =
-            Sub(sender As Object, e As EventArgs)
-                gotEvent = True
-            End Sub
-
-        ' Create a wrapper for our anonymous delegate in the type that the event subscription expects.
-        Dim combinedDelegate = [Delegate].CreateDelegate(GetType(TEventHandler),
-                                                         handler, NameOf(handler.Invoke)) ' Invoke isn't a public method on Delegate, but it is on the closure
-
-        Dim targetEvent = GetType(TEventWrapper).GetEvent(eventName)
-        If IsNothing(targetEvent) Then
-            Assert.Fail($"Could not find the event '{eventName}' on the trigger wrapper type '{GetType(TEventWrapper).FullName}'")
-        End If
-
-        Dim wrapperTriggerMethod = GetType(TEventWrapper).GetMethod(triggerMethod)
-        If IsNothing(wrapperTriggerMethod) Then
-            Assert.Fail($"Could not find the trigger method '{triggerMethod}' on the trigger wrapper type '{GetType(TEventWrapper).FullName}'")
-        End If
-
-        Try
-            targetEvent.AddEventHandler(wrapper, combinedDelegate)
-            wrapperTriggerMethod.Invoke(wrapper, Nothing)
-        Finally
-            targetEvent.RemoveEventHandler(wrapper, combinedDelegate)
-        End Try
-
-        Assert.IsTrue(gotEvent,
-                      $"Expected the event '{eventName}' to be triggered when the trigger method '{triggerMethod}' was called on the trigger wrapper type '{GetType(TEventWrapper).FullName}', but it was not.")
-    End Sub
-    */
 }
